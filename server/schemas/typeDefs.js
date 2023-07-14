@@ -20,7 +20,7 @@ type User {
 }
 
 type Auth {
-    token: jwt
+    token: ID!
     user: User
 }
 

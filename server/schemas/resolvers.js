@@ -1,4 +1,6 @@
 const { Book, User } = require('../models');
+const { signToken } = require('../utils/auth');
+const { AuthenticationError } = require('apollo-server-express');
 
 const resolvers = {
   Query: {
@@ -14,24 +16,50 @@ const resolvers = {
       return User.find();
     },
 
-    me: async () => {
-      return User.find();
+    me: async (parent,args,context) => {
+      if(context.user){
+
+        return User.findOne({_id:context.user._id});
+      }
+      throw AuthenticationError;
     },
 
   },
 
   Mutation: {
     login: async (parent, { email, password }) => {
-      return await Auth.findOne({ email, password});
+      const user = await User.findOne({ email });
+      if(!user){
+        throw AuthenticationError
+      }
+      const pswd =  user.isCorrectPassword(password) 
+      if(!pswd){
+        throw AuthenticationError
+      }
+      const token = signToken(user)
+      return {token,user}
+
     },
     addUser: async (parent, { username, email, password }) => {
-      return await Auth.create({ username, email, password  });
+      const newUser = await Auth.create({ username, email, password  });
+      const newToken = signToken(newUser)
+      return {newToken, newUser}
     },
-    saveBook: async (parent, { criteria }) => {
-      return User.findOne({criteria});
+    saveBook: async (parent, { criteria }, context) => {
+      if(context.user){
+        const savedItem = User.findOneAndUpdate({_id: context.user._id},
+          {$push:{savedBooks:criteria}},{new:true})
+          return savedItem;
+      }
+      throw AuthenticationError
     },
-    removeBook: async (parent, { bookId }) => {
-      return User.findOneAndDelete({ _id: bookId });
+    removeBook: async (parent, { bookId }, context) => {
+      if(context.user){
+        const savedItem = User.findOneAndUpdate({_id: context.user._id},
+          {$pull:{savedBooks:{bookId}}},{new:true})
+          return savedItem;
+      }
+      throw AuthenticationError
     },
   },
 };
