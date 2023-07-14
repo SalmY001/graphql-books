@@ -41,9 +41,10 @@ const resolvers = {
 
     },
     addUser: async (parent, { username, email, password }) => {
-      const newUser = await Auth.create({ username, email, password  });
+      const newUser = await User.create({ username, email, password  });
       const newToken = signToken(newUser)
-      return {newToken, newUser}
+      console.log("Add User",newUser,newToken)
+      return {token:newToken, user:newUser}
     },
     saveBook: async (parent, { criteria }, context) => {
       if(context.user){
