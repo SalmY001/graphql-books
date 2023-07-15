@@ -15,6 +15,7 @@ type User {
     _id: ID
     username: String
     email: String
+    password: String
     bookCount: Int
     savedBooks: [Book]
 }
@@ -46,7 +47,7 @@ type Mutation {
     addUser(username: String, email: String, password: String): Auth
     saveBook(criteria: saveBookInput): User
     removeBook(bookId: String): User
-  }
+}
 `;
 
 module.exports = typeDefs;
