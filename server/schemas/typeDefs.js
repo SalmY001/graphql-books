@@ -26,9 +26,6 @@ type Auth {
 }
 
 type Query {
-    books: [Book]
-    users: [User]
-    book(id: ID!): Book
     me: User
 }
 
